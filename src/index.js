@@ -2,10 +2,12 @@ import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import { withDocument } from "part:@sanity/form-builder";
 import { FormBuilderInput, patches } from "part:@sanity/form-builder";
+import DefaultLabel from "part:@sanity/components/labels/default";
 import * as PathUtils from "@sanity/util/paths.js";
 import WarningIcon from "part:@sanity/base/warning-icon";
 import Button from "part:@sanity/components/buttons/default";
 import styles from "./tabs.css";
+import defaultStyles from "part:@sanity/components/formfields/default-style";
 
 const { setIfMissing } = patches;
 
@@ -20,7 +22,12 @@ class Tabs extends React.Component {
     value: PropTypes.object,
     onFocus: PropTypes.func,
     onBlur: PropTypes.func,
-    onChange: PropTypes.func.isRequired
+    onChange: PropTypes.func.isRequired,
+    level: PropTypes.number
+  };
+
+  static defaultProps = {
+    level: 1
   };
 
   state = {
@@ -127,10 +134,12 @@ class Tabs extends React.Component {
   render = () => {
     console.debug(`[Tabs] Props:`, this.props);
 
-    const { type, value } = this.props;
+    const { type, value, level } = this.props;
     const tabFields = this.getActiveTabFields();
 
     let contentStyle = styles.content_document;
+
+    console.log(styles);
 
     if (type.options.layout === "object") {
       contentStyle = styles.content_object;
@@ -138,6 +147,15 @@ class Tabs extends React.Component {
 
     return (
       <div className={styles.tabs}>
+        {type.title && (
+          <div className={defaultStyles.header}>
+            <div className={defaultStyles.headerMain}>
+              <DefaultLabel className={defaultStyles.label} level={level}>
+                {type.title}
+              </DefaultLabel>
+            </div>
+          </div>
+        )}
         {type.fieldsets &&
           type.fieldsets.length > 0 &&
           type.fieldsets[0].single !== true && (
@@ -159,6 +177,7 @@ class Tabs extends React.Component {
                     color="primary"
                     inverted={this.state.activeTab == fs.name ? false : true}
                     onClick={() => this.onTabClicked(fs)}
+                    padding="small"
                   >
                     {title}
                     {errors.length > 0 && (
@@ -180,7 +199,8 @@ class Tabs extends React.Component {
                 markers: m,
                 value: value && value[field.name],
                 onFocus: path => this.onFieldFocusHandler(field, path),
-                onChange: patchEvent => this.onFieldChangeHandler(field, patchEvent)
+                onChange: patchEvent =>
+                  this.onFieldChangeHandler(field, patchEvent)
               };
 
               return <FormBuilderInput {...fieldProps} />;

@@ -8,6 +8,7 @@
 }
 
 .tab_headers {
+  margin-left: 1px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
